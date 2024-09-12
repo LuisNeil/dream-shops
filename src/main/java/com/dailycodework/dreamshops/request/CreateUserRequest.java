@@ -1,4 +1,4 @@
-package com.dailycodework.dreamshops.service.request;
+package com.dailycodework.dreamshops.request;
 
 import lombok.Data;
 
