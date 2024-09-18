@@ -1,6 +1,7 @@
 package com.dailycodework.dreamshops.controller;
 
 import com.dailycodework.dreamshops.dto.ProductDto;
+import com.dailycodework.dreamshops.exception.AlreadyExistsException;
 import com.dailycodework.dreamshops.exception.ResourceNotFoundException;
 import com.dailycodework.dreamshops.model.Product;
 import com.dailycodework.dreamshops.request.AddProductRequest;
@@ -13,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,7 +50,10 @@ public class ProductController {
             Product theProduct = productService.addProduct(request);
             ProductDto productDto = productService.convertToDto(theProduct);
             return ResponseEntity.ok(new ApiResponse("Add product success", productDto));
-        } catch (Exception e) {
+        }catch (AlreadyExistsException e){
+            return ResponseEntity.status(CONFLICT).body(new ApiResponse("error", e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse("error", e.getMessage()));
         }
     }
@@ -158,7 +161,7 @@ public class ProductController {
             @RequestParam String name
     ){
         try {
-            var productCount= countProductsByBrandAndName(brand, name);
+            var productCount= productService.countProductsByBrandAndName(brand, name);
             return ResponseEntity.ok(new ApiResponse("success", productCount));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse("error", e.getMessage()));
